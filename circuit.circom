@@ -1,0 +1,45 @@
+pragma circom 2.0.0;
+
+template MIMC5(){
+    signal input x;
+    signal input k;
+    signal output h;
+
+    var nRounds = 10;
+
+    var c[nRounds] = [
+        0,
+        21888242871839275222246405745257275088548364400416034343698204186575808495611,
+        21888242871839275222246405745257275088548364400416034343698204186575808495612,
+        21888242871839275222246405745257275088548364400416034343698204186575808495613,
+        21888242871839275222246405745257275088548364400416034343698204186575808495614,
+        21888242871839275222246405745257275088548364400416034343698204186575808495615,
+        21888242871839275222246405745257275088548364400416034343698204186575808495616,
+        21888242871839275222246405745257275088548364400416034343698204186575808495617,
+        21888242871839275222246405745257275088548364400416034343698204186575808495618,
+        21888242871839275222246405745257275088548364400416034343698204186575808495619
+    ];
+
+    signal lastOutput[nRounds+1];
+    var base[nRounds];
+    signal base2[nRounds];
+    signal base4[nRounds];
+
+    // initializing the first value with x and subsequently newer values will be added in.
+    lastOutput[0] <== x;
+
+    for(var i=0; i < nRounds; i++){
+        base[i] = lastOutput[i] + k + c[i];
+        // 2nd power of base
+        base2[i] <== base[i] * base[i];
+        // 4th power of base
+        base4[i] <== base2[i] * base2[i];
+
+        // The fifth power of base.
+        lastOutput[i + 1] <== base4[i] * base[i];
+    }
+
+    h <== lastOutput[nRounds] + k;
+}
+
+component main = MIMC5();
